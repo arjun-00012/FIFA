@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SOFTTAC Premier League | Live Auction Arena</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800;900&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-stadium: #050508;
+            --card-glass: #101018;
+            --cyber-cyan: #00f0ff;
+            --laser-green: #39ff14;
+            --neon-gold: #ffcc00;
+            --pure-white: #ffffff;
+            --bright-yellow: #ffee00;
+            --pitch-line: rgba(255, 255, 255, 0.6);
+        }
+        
+        body { 
+            background-color: var(--bg-stadium); 
+            color: var(--pure-white); 
+            font-family: 'Rajdhani', sans-serif; 
+            font-weight: 700;
+            overflow-x: hidden;
+            letter-spacing: 0.5px;
+             cursor: cell;}
+        button, a, select, .nav-link, .dropdown-item {
+            cursor: cell;
+        }
+
+        .football-trail-particle {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 14px;
+            height: 14px;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Ccircle cx='8' cy='8' r='7' fill='%2339ff14' stroke='%23000' stroke-width='1'/%3E%3Cpath d='M8 1L5 5L2 4L4 8L3 11L6 12L8 15L10 12L13 11L12 8L14 4L11 5Z' fill='%23000'/%3E%3C/svg%3E");
+            background-size: contain;
+            background-repeat: no-repeat;
+            pointer-events: none;
+            z-index: 100000;
+            transform: translate(-50%, -50%);
+            mix-blend-mode: screen;
+        }
+        
+        h1, h2, h3, h4, .neon-heading { 
+            font-family: 'Orbitron', sans-serif; 
+            text-transform: uppercase; 
+            letter-spacing: 2px;
+            text-shadow: 0 0 12px rgba(0, 240, 255, 0.6);
+        }
+
+        .auction-stage { 
+            background: var(--card-glass); 
+            border: 3px solid var(--cyber-cyan);
+            border-radius: 16px; 
+            padding: 30px; 
+            box-shadow: 0 0 40px rgba(0, 240, 255, 0.3);
+        }
+
+        .poster-frame {
+            position: relative; width: 100%; height: 380px; border-radius: 12px; overflow: hidden; 
+            background: #000000; border: 3px solid #22223a;
+        }
+        .player-showcase-img { width: 100%; height: 100%; object-fit: cover; z-index: 1; position: absolute; }
+        
+        .team-overlay-poster {
+            position: absolute; top: 15px; right: 15px; width: 120px; height: 120px; object-fit: contain; z-index: 3; 
+            transform: scale(0); transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            filter: drop-shadow(0 0 15px rgba(0,0,0,1));
+        }
+        .team-overlay-poster.active { transform: scale(1); animation: pulseGlow 1.5s infinite alternate; }
+
+        .search-input {
+            background: #10101a; border: 3px solid var(--cyber-cyan); color: var(--pure-white); font-size: 1.2rem; font-weight: 700;
+        }
+        .search-input:focus {
+            background: #151525; border-color: var(--laser-green); box-shadow: 0 0 20px rgba(57, 255, 20, 0.6); color: var(--pure-white);
+        }
+
+        .label-glow-cyan { color: var(--cyber-cyan); text-shadow: 0 0 8px rgba(0, 240, 255, 0.5); font-weight: bold; }
+        .label-glow-yellow { color: var(--bright-yellow); text-shadow: 0 0 8px rgba(255, 238, 0, 0.5); font-weight: bold; }
+        .valuation-badge { font-size: 2.6rem; font-weight: 900; font-family: 'Orbitron', sans-serif; color: var(--bright-yellow) !important; text-shadow: 0 0 20px rgba(255, 238, 0, 0.7); }
+        
+        .live-ticker { 
+            background: #000000; border: 2px solid var(--laser-green); border-left: 8px solid var(--laser-green); 
+            padding: 15px; font-size: 1.3rem; font-weight: 700; color: var(--pure-white);
+            box-shadow: 0 0 20px rgba(57, 255, 20, 0.2);
+            text-shadow: 1px 1px 2px #000;
+        }
+
+        .football-pitch {
+            background: linear-gradient(180deg, #0e3518 0%, #05160a 100%);
+            border: 3px solid var(--pure-white); border-radius: 16px; width: 100%; height: 500px;
+            position: relative; box-shadow: inset 0 0 100px rgba(0,0,0,1), 0 0 30px rgba(255,255,255,0.1);
+            display: flex; flex-direction: column; justify-content: space-between; padding: 20px 10px; overflow: hidden;
+        }
+        .pitch-center-circle {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 130px; height: 130px; border: 3px solid var(--pitch-line); border-radius: 50%; pointer-events: none;
+        }
+        .pitch-center-line {
+            position: absolute; top: 50%; left: 0; width: 100%; height: 3px; background: var(--pitch-line); pointer-events: none;
+        }
+        .pitch-lane-row { display: flex; justify-content: center; align-items: center; gap: 15px; width: 100%; min-height: 90px; z-index: 2; }
+        
+        .field-player-card { text-align: center; width: 85px; animation: nodeSpawn 0.4s ease-out; }
+        .player-photo-node {
+            width: 72px; height: 72px; border-radius: 50%; border: 3px solid var(--cyber-cyan);
+            background: #000; margin: 0 auto; overflow: hidden; display: flex; align-items: center; justify-content: center;
+            box-shadow: 0 0 18px rgba(0, 240, 255, 0.7);
+        }
+        .player-photo-node img { width: 100%; height: 100%; object-fit: cover; }
+        
+        .field-label-tag { font-size: 0.75rem; background: #000; color: var(--cyber-cyan); padding: 2px 6px; border-radius: 4px; font-weight: 900; border: 1px solid var(--cyber-cyan); }
+        .field-p-name { font-size: 0.85rem; font-weight: 900; color: var(--pure-white); margin-top: 4px; text-shadow: 2px 2px 4px #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000; }
+        .field-vacant-text { font-size: 0.8rem; font-weight: 700; color: rgba(255, 255, 255, 0.6) !important; text-shadow: 1px 1px 2px #000; }
+
+        .nav-pills .nav-link { color: var(--pure-white); border: 1px solid rgba(255,255,255,0.2); font-weight: 700; font-size: 1.1rem; margin: 0 2px; background: #12121a; }
+        .nav-pills .nav-link.active { background-color: var(--cyber-cyan) !important; color: #000 !important; font-weight: 900; box-shadow: 0 0 15px rgba(0,240,255,0.4); }
+
+=        .pitch-management-box {
+            display: flex; 
+            gap: 12px; 
+            margin-bottom: 15px; 
+            width: 100%;
+        }
+        .staff-avatar-card { 
+            display: flex; 
+            align-items: center; 
+            gap: 12px; 
+            background: #09090e; 
+            border-radius: 12px; 
+            padding: 8px 14px; 
+            flex: 1; 
+            backdrop-filter: blur(8px);
+        }
+        .staff-avatar-card.manager-card { border: 2px solid var(--cyber-cyan); box-shadow: 0 0 15px rgba(0, 240, 255, 0.2); }
+        .staff-avatar-card.captain-card { border: 2px solid var(--neon-gold); box-shadow: 0 0 15px rgba(255, 204, 0, 0.2); }
+        .staff-photo { width: 90px; height: 90px; border-radius: 8px; overflow: hidden; background: #000; flex-shrink: 0; }
+        .staff-photo img { width: 100%; height: 100%; object-fit: cover; }
+        .manager-card .staff-photo { border: 2px solid var(--cyber-cyan); }
+        .captain-card .staff-photo { border: 2px solid var(--neon-gold); }
+        .staff-info-lbl { font-size: 1.1rem; font-weight: 900; color: #ffffff; line-height: 1.2; text-transform: uppercase; }
+        .staff-role-sub { font-size: 0.7rem; display: inline-block; font-weight: 900; font-family: 'Orbitron', sans-serif; padding: 2px 6px; border-radius: 4px; margin-bottom: 4px; letter-spacing: 1px; color: #000000; }
+        .manager-card .staff-role-sub { background: var(--cyber-cyan); }
+        .captain-card .staff-role-sub { background: var(--neon-gold); }
+        .staff-name-text { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 140px; }
+
+        .player-fly-particle {
+            position: fixed;
+            z-index: 99999;
+            pointer-events: none;
+            border-radius: 50%;
+            border: 4px solid var(--laser-green);
+            box-shadow: 0 0 25px var(--laser-green), 0 0 45px var(--cyber-cyan);
+            object-fit: cover;
+            transition: all 0.85s cubic-bezier(0.25, 1, 0.5, 1);
+        }
+
+        @keyframes pulseGlow { from { filter: drop-shadow(0 0 10px var(--cyber-cyan)); } to { filter: drop-shadow(0 0 25px var(--cyber-cyan)); } }
+        @keyframes nodeSpawn { from { transform: scale(0); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid py-4 px-5">
+    
+    <header class="d-flex justify-content-between align-items-center mb-4 pb-3 border-bottom border-secondary">
+        <div>
+            <h1 class="text-white m-0 fs-1">SOFTTAC <span style="color: var(--cyber-cyan);">PREMIER LEAGUE</span></h1>
+            <small class="text-warning tracking-widest font-monospace fw-bold fs-6">LIVE SPECTATOR AUCTION EMBED CONSOLE</small>
+        </div>
+        
+        <div class="d-flex gap-2 align-items-center">
+            <a href="{% url 'backup_tournament_data' %}" class="btn btn-outline-danger px-3 py-2 font-monospace fw-bold fs-5 me-2" style="color: #ff0055; border-color: #ff0055; box-shadow: 0 0 10px rgba(255,0,85,0.2);">
+                💾 SAVE FULL DATABASE
+            </a>
+
+            <div class="dropdown">
+                <button class="btn select-btn-custom dropdown-toggle px-4 py-2 fs-5" type="button" id="playerSelectMenuBtn" data-bs-toggle="dropdown" aria-expanded="false">
+                    🏃 PLAYERS SELECT BUTTON
+                </button>
+                <ul class="dropdown-menu dropdown-menu-cyber shadow-lg" aria-labelledby="playerSelectMenuBtn">
+                    {% for player in players %}
+                        {% if player.status != 'SOLD' %}
+                        <li>
+                            <button class="dropdown-item dropdown-item-cyber py-2 font-monospace" type="button" 
+                                    onclick="selectPlayerToAuctionBlock({id: {{ player.id }}, name: '{{ player.name|escapejs }}', position: '{{ player.position }}', base_amount: {{ player.base_amount }}, current_bid: 0, image_url: '{{ player.image.url }}'})">
+                                <span class="text-info">[{{ player.position }}]</span> {{ player.name }} — <span class="text-warning">${{ player.base_amount }}</span>
+                            </button>
+                        </li>
+                        {% endif %}
+                    {% empty %}
+                    <li><span class="dropdown-item text-white small">No draft targets available</span></li>
+                    {% endfor %}
+                </ul>
+            </div>
+            <a href="{% url 'management_panel' %}" class="btn btn-outline-warning px-3 py-2 font-monospace fw-bold fs-5">⚙️ PANEL CONFIG</a>
+        </div>
+    </header>
+
+    <div class="row g-4">
+        <div class="col-xl-7 col-lg-12">
+            <div class="input-group mb-4">
+                <span class="input-group-text bg-dark border-secondary text-white fs-4">🔍</span>
+                <input type="text" id="playerSearch" class="form-control search-input" placeholder="Type here to live filter pool files instantly...">
+                <div id="searchDropdown" class="list-group position-absolute w-100 z-3 mt-5 d-none border border-secondary bg-dark"></div>
+            </div>
+
+            <div class="auction-stage">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <div class="poster-frame" id="auctionShowcaseFrame">
+                            <img id="stagePlayerImg" src="{% if active_player %}{{ active_player.image.url }}{% else %}https://placehold.co/400x500/12121a/fff?text=SOFTTAC+LEAGUE{% endif %}" class="player-showcase-img">
+                            <img id="stageTeamPoster" src="" class="team-overlay-poster">
+                        </div>
+                    </div>
+                    <div class="col-md-7 d-flex flex-column justify-content-between h-100 py-3">
+                        <div>
+                            <span id="stagePlayerPos" class="badge bg-danger mb-2 fs-5 px-3 py-2 font-monospace text-white">{{ active_player.get_position_display|default:"STADIUM POOL" }}</span>
+                            <h2 id="stagePlayerName" class="display-4 fw-bold text-white mb-3" style="color: #ffffff !important; text-shadow: 2px 2px 4px #000;">{{ active_player.name|default:"Awaiting Selection..." }}</h2>
+                            <hr style="border-color: rgba(255,255,255,0.3)">
+                            
+                            <div class="row text-center my-4">
+                                <div class="col-6 border-end border-secondary">
+                                    <small class="label-glow-cyan d-block font-monospace uppercase tracking-wider fs-5">BASE AMOUNT</small>
+                                    <span id="stageBaseAmt" class="fw-bold text-white fs-1">${{ active_player.base_amount|default:"20" }}</span>
+                                </div>
+                                <div class="col-6">
+                                    <small class="label-glow-yellow d-block font-monospace uppercase tracking-wider fs-5">LIVE BID VALUE</small>
+                                    <span id="stageCurrentBid" class="valuation-badge">${{ active_player.current_bid|default:"0.00" }}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <div id="liveTickerAlert" class="live-ticker mb-3 rounded d-none">Ready for tracking...</div>
+                            <div class="row g-2">
+                                <div class="col-8">
+                                    <button id="soldBtn" class="btn btn-success h-100 w-100 py-3 text-uppercase font-monospace fw-black fs-4 tracking-wider" style="background: var(--laser-green); color:#000; border:none;" onclick="finalizeSoldTransaction()">
+                                        🔨 HAMMER DOWN - SOLD
+                                    </button>
+                                </div>
+                                <div class="col-4">
+                                    <button id="undoBtn" class="btn btn-danger h-100 w-100 py-3 text-uppercase font-monospace fw-bold fs-5" style="background:#ff003c; border:none; color:#fff;" onclick="executeUndoBidRollback()" disabled>
+                                        ↩️ UNDO LAST
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-3 mt-4">
+                    <div class="col-12"><h5 class="text-warning font-monospace tracking-widest text-uppercase m-0 fs-5">LIVE BID SQUAD OVERLAYS</h5></div>
+                    {% for team in teams %}
+                    <div class="col-sm-6 col-md-3">
+                        <button type="button" class="btn btn-outline-info w-100 py-3 font-monospace border-3" style="color: var(--cyber-cyan); border-color: var(--cyber-cyan); background: #0b0b14;"
+                                onclick="processTeamBidIncrement({{ team.id }}, '{{ team.name|escapejs }}', '{{ team.logo.url }}')">
+                            <span class="fw-black fs-4 d-block text-white" style="text-shadow:1px 1px 2px #000;">{{ team.name }}</span>
+                            <span class="fs-5 d-block mt-1 fw-bold text-laser-green" id="btn-budget-{{ team.id }}">${{ team.budget }}</span>
+                        </button>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-5 col-lg-12">
+            <div class="card h-100 border-0" style="background: var(--card-glass); box-shadow: 0 0 35px rgba(0,0,0,0.8); border: 2px solid #222232 !important;">
+                <div class="card-header bg-black py-3 border-0">
+                    <h4 class="m-0 text-neon-cyan fs-4 font-monospace text-center">SQUAD RADAR MONITOR</h4>
+                </div>
+                <div class="card-body d-flex flex-column justify-content-between">
+                    
+                    <ul class="nav nav-pills nav-justified mb-3" id="teamTabs">
+                        {% for team in teams %}
+                        <li class="nav-item">
+                            <button class="nav-link {% if forloop.first %}active{% endif %} text-truncate font-monospace" id="tab-control-{{ team.id }}" data-bs-toggle="tab" data-bs-target="#panel-team-{{ team.id }}" type="button" onclick="renderTacticalLineup({{ team.id }})">
+                                {{ team.name }}
+                            </button>
+                        </li>
+                        {% endfor %}
+                    </ul>
+
+                    <div class="tab-content">
+                        {% for team in teams %}
+                        <div class="tab-pane fade {% if forloop.first %}show active{% endif %}" id="panel-team-{{ team.id }}">
+                            
+                            <div class="row bg-black p-3 rounded mb-3 text-center g-0 border-2 border-secondary font-monospace align-items-center">
+                                <div class="col-7 text-start ps-2 fs-5">
+                                    <span class="text-neon-cyan fs-5 d-block fw-black">ACTIVE ROSTER STRATEGICS</span>
+                                </div>
+                                <div class="col-5 text-end pe-2">
+                                    <small class="text-warning d-block fw-bold fs-6">REMAINING BANK</small>
+                                    <strong style="color: var(--laser-green);" class="fs-3" id="balance-text-{{ team.id }}">${{ team.budget }}</strong>
+                                    
+                                    <div class="mt-2">
+                                        <a href="{% url 'export_squad_excel' team.id %}" class="btn btn-sm btn-outline-warning fw-bold font-monospace px-2 py-1 text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                                            📥 Export Squad
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="pitch-management-box">
+                                <div class="staff-avatar-card manager-card">
+                                    <div class="staff-photo"><img id="mgr-img-{{ team.id }}" src="{{ team.manager_image.url }}"></div>
+                                    <div class="staff-info-lbl">
+                                        <span class="staff-role-sub">MANAGER</span>
+                                        <span class="staff-name-text" id="mgr-name-{{ team.id }}">{{ team.manager_name }}</span>
+                                    </div>
+                                </div>
+                                <div class="staff-avatar-card captain-card">
+                                    <div class="staff-photo"><img id="cap-img-{{ team.id }}" src="{{ team.captain_image.url }}"></div>
+                                    <div class="staff-info-lbl">
+                                        <span class="staff-role-sub">CAPTAIN</span>
+                                        <span class="staff-name-text" id="cap-name-{{ team.id }}">{{ team.captain_name }}</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="football-pitch">
+                                <div class="pitch-center-line"></div>
+                                <div class="pitch-center-circle"></div>
+
+                                <div class="pitch-lane-row" id="lane-{{ team.id }}-FWD"></div>
+                                <div class="pitch-lane-row" id="lane-{{ team.id }}-CMF"></div>
+                                <div class="pitch-lane-row" id="lane-{{ team.id }}-CB"></div>
+                                <div class="pitch-lane-row" id="lane-{{ team.id }}-GK"></div>
+                            </div>
+
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let lastThrottledMouseCoordinates = { x: 0, y: 0 };
+    
+    window.addEventListener('mousemove', function(event) {
+        let distanceDelta = Math.hypot(event.clientX - lastThrottledMouseCoordinates.x, event.clientY - lastThrottledMouseCoordinates.y);
+        if (distanceDelta < 25) return; 
+
+        lastThrottledMouseCoordinates.x = event.clientX;
+        lastThrottledMouseCoordinates.y = event.clientY;
+
+        const trailNode = document.createElement('div');
+        trailNode.className = 'football-trail-particle';
+        trailNode.style.top = `${event.clientY}px`;
+        trailNode.style.left = `${event.clientX}px`;
+        document.body.appendChild(trailNode);
+
+        let currentScaleValue = 1.0;
+        let currentOpacityValue = 0.9;
+        
+        function cycleParticleFrame() {
+            currentScaleValue -= 0.04;
+            currentOpacityValue -= 0.03;
+            
+            if (currentOpacityValue <= 0 || currentScaleValue <= 0) {
+                trailNode.remove();
+            } else {
+                trailNode.style.transform = `translate(-50%, -50%) scale(${currentScaleValue})`;
+                trailNode.style.opacity = currentOpacityValue;
+                requestAnimationFrame(cycleParticleFrame);
+            }
+        }
+        requestAnimationFrame(cycleParticleFrame);
+    });
+
+    let currentGlobalAuctionPlayer = {
+        id: {% if active_player %}{{ active_player.id }}{% else %}null{% endif %},
+        name: "{{ active_player.name|default:'' }}",
+        position: "{{ active_player.position|default:'' }}",
+        base_amount: parseFloat("{{ active_player.base_amount|default:20.00 }}"),
+        current_bid: parseFloat("{{ active_player.current_bid|default:0.00 }}"),
+        image_url: "{% if active_player %}{{ active_player.image.url }}{% endif %}"
+    };
+
+    let highestBiddingTeam = null;
+    let localTeamsRosterState = {};
+    let liveBidHistoryTimeline = [];
+
+    {% for team in teams %}
+    localTeamsRosterState[{{ team.id }}] = {
+        id: {{ team.id }},
+        name: "{{ team.name|escapejs }}",
+        budget: parseFloat("{{ team.budget }}"),
+        manager: "{{ team.manager_name|escapejs }}",
+        manager_img: "{{ team.manager_image.url }}",
+        captain: "{{ team.captain_name|escapejs }}",
+        captain_img: "{{ team.captain_image.url }}",
+        players: [
+            {% for p in team.players.all %}{ name: "{{ p.name|escapejs }}", position: "{{ p.position }}", img: "{{ p.image.url }}" },{% endfor %}
+        ]
+    };
+    {% endfor %}
+
+    document.getElementById('playerSearch').addEventListener('input', function(e) {
+        let query = e.target.value.trim();
+        let dropdown = document.getElementById('searchDropdown');
+        if(query.length < 1) { dropdown.classList.add('d-none'); return; }
+
+        fetch(`/api/search/?q=${encodeURIComponent(query)}`)
+            .then(res => res.json())
+            .then(data => {
+                dropdown.innerHTML = '';
+                if(data.players.length === 0) {
+                    dropdown.innerHTML = `<div class="list-group-item bg-dark text-white border-secondary fs-5 font-bold">No matching records found</div>`;
+                } else {
+                    data.players.forEach(p => {
+                        let btn = document.createElement('button');
+                        btn.className = "list-group-item list-group-item-action bg-dark text-white border-secondary d-flex justify-content-between align-items-center font-monospace fs-5 fw-bold";
+                        btn.innerHTML = `<div><strong class="text-white">${p.name}</strong> <span class="badge bg-danger ms-2">${p.position}</span></div> <span style="color: var(--neon-gold); font-weight:900;">$${p.base_amount}</span>`;
+                        btn.onclick = function() {
+                            selectPlayerToAuctionBlock(p);
+                            dropdown.classList.add('d-none');
+                            document.getElementById('playerSearch').value = '';
+                        };
+                        dropdown.appendChild(btn);
+                    });
+                }
+                dropdown.classList.remove('d-none');
+            });
+    });
+
+    function selectPlayerToAuctionBlock(player) {
+        currentGlobalAuctionPlayer = player;
+        highestBiddingTeam = null;
+        liveBidHistoryTimeline = [];
+        document.getElementById('undoBtn').disabled = true;
+
+        document.getElementById('stagePlayerName').innerText = player.name;
+        document.getElementById('stagePlayerPos').innerText = player.position;
+        document.getElementById('stageBaseAmt').innerText = `$${parseFloat(player.base_amount).toFixed(2)}`;
+        
+        let initialDisplayPrice = player.current_bid > 0 ? player.current_bid : player.base_amount;
+        document.getElementById('stageCurrentBid').innerText = `$${parseFloat(initialDisplayPrice).toFixed(2)}`;
+        document.getElementById('stagePlayerImg').src = player.image_url;
+        
+        let poster = document.getElementById('stageTeamPoster');
+        poster.classList.remove('active');
+        poster.src = '';
+
+        let ticker = document.getElementById('liveTickerAlert');
+        ticker.classList.remove('d-none');
+        ticker.className = "live-ticker rounded text-white";
+        ticker.innerHTML = `🎯 TARGET SELECTION LOCKED: <span class="text-info">${player.name}</span> is on the floor.`;
+    }
+
+    function processTeamBidIncrement(teamId, teamName, logoUrl) {
+        if(!currentGlobalAuctionPlayer.id) return;
+        
+        let curBid = currentGlobalAuctionPlayer.current_bid === 0 ? currentGlobalAuctionPlayer.base_amount : currentGlobalAuctionPlayer.current_bid;
+        
+        liveBidHistoryTimeline.push({
+            current_bid: currentGlobalAuctionPlayer.current_bid,
+            highest_bidder_id: highestBiddingTeam,
+            poster_url: document.getElementById('stageTeamPoster').src,
+            poster_active: document.getElementById('stageTeamPoster').classList.contains('active'),
+            ticker_html: document.getElementById('liveTickerAlert').innerHTML
+        });
+        document.getElementById('undoBtn').disabled = false;
+
+        let incrementStep = (curBid <= 100) ? 20 : 50;
+        let nextBid = curBid + incrementStep;
+        
+        if(nextBid > localTeamsRosterState[teamId].budget) { 
+            alert(`Insufficient funds! ${teamName} cannot support a $${nextBid} bid.`); 
+            liveBidHistoryTimeline.pop();
+            if(liveBidHistoryTimeline.length === 0) document.getElementById('undoBtn').disabled = true;
+            return; 
+        }
+
+        currentGlobalAuctionPlayer.current_bid = nextBid;
+        highestBiddingTeam = teamId;
+
+        document.getElementById('stageCurrentBid').innerText = `$${nextBid.toFixed(2)}`;
+        let ticker = document.getElementById('liveTickerAlert');
+        ticker.classList.remove('d-none');
+        ticker.className = "live-ticker rounded text-white border-info";
+        ticker.innerHTML = `⚡ <span style="color: var(--cyber-cyan); font-weight:900; font-size:1.4rem;">${teamName}</span> spikes offer to <span style="color: var(--laser-green); font-weight:900; font-size:1.4rem;">$${nextBid.toFixed(2)}</span>!`;
+
+        let posterImg = document.getElementById('stageTeamPoster');
+        posterImg.classList.remove('active');
+        setTimeout(() => { posterImg.src = logoUrl; posterImg.classList.add('active'); }, 50);
+    }
+
+    function executeUndoBidRollback() {
+        if (liveBidHistoryTimeline.length === 0) return;
+
+        let prev = liveBidHistoryTimeline.pop();
+        currentGlobalAuctionPlayer.current_bid = prev.current_bid;
+        highestBiddingTeam = prev.highest_bidder_id;
+
+        let displayPrice = currentGlobalAuctionPlayer.current_bid === 0 ? currentGlobalAuctionPlayer.base_amount : currentGlobalAuctionPlayer.current_bid;
+        document.getElementById('stageCurrentBid').innerText = `$${displayPrice.toFixed(2)}`;
+
+        let ticker = document.getElementById('liveTickerAlert');
+        ticker.innerHTML = prev.ticker_html;
+
+        let posterImg = document.getElementById('stageTeamPoster');
+        if (prev.poster_active) {
+            posterImg.src = prev.poster_url;
+            posterImg.classList.add('active');
+        } else {
+            posterImg.classList.remove('active');
+            posterImg.src = '';
+        }
+
+        if (liveBidHistoryTimeline.length === 0) document.getElementById('undoBtn').disabled = true;
+    }
+
+    function finalizeSoldTransaction() {
+        if(!currentGlobalAuctionPlayer.id || !highestBiddingTeam) { alert("Action denied. No active bid logged."); return; }
+        
+        let targetTeamId = highestBiddingTeam;
+        let targetPosition = currentGlobalAuctionPlayer.position;
+        let playerImgUrl = currentGlobalAuctionPlayer.image_url;
+        let payload = { player_id: currentGlobalAuctionPlayer.id, team_id: targetTeamId, final_price: currentGlobalAuctionPlayer.current_bid };
+
+        bootstrap.Tab.getOrCreateInstance(document.querySelector(`#tab-control-${targetTeamId}`)).show();
+
+        fetch('/api/finalize-sale/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.success) {
+                localTeamsRosterState[targetTeamId].budget = data.updated_budget;
+                localTeamsRosterState[targetTeamId].manager = data.manager_name;
+                localTeamsRosterState[targetTeamId].manager_img = data.manager_img;
+                localTeamsRosterState[targetTeamId].captain = data.captain_name;
+                localTeamsRosterState[targetTeamId].captain_img = data.captain_img;
+
+                localTeamsRosterState[targetTeamId].players.push({
+                    name: currentGlobalAuctionPlayer.name,
+                    position: currentGlobalAuctionPlayer.position,
+                    img: playerImgUrl
+                });
+
+                document.getElementById(`balance-text-${targetTeamId}`).innerText = `$${data.updated_budget.toFixed(2)}`;
+                document.getElementById(`btn-budget-${targetTeamId}`).innerText = `$${data.updated_budget.toFixed(2)}`;
+                
+                let ticker = document.getElementById('liveTickerAlert');
+                ticker.className = "live-ticker rounded text-black bg-success font-black border-0 text-center";
+                ticker.innerHTML = `🏆 SOLD! ${data.player_name} LOCKED TO FORMATION FIELD TARGETS!`;
+                
+                liveBidHistoryTimeline = [];
+                document.getElementById('undoBtn').disabled = true;
+
+                animatePlayerToFormationField(targetTeamId, targetPosition, playerImgUrl);
+
+                highestBiddingTeam = null;
+            } else { alert(data.error); }
+        });
+    }
+
+    function animatePlayerToFormationField(teamId, position, imgUrl) {
+        const sourceStageNode = document.getElementById('auctionShowcaseFrame');
+        const activeLaneNode = document.getElementById(`lane-${teamId}-${position}`);
+        
+        if (!sourceStageNode || !activeLaneNode) { renderTacticalLineup(teamId); return; }
+
+        const destinationTargetNode = activeLaneNode.querySelector('.player-photo-node');
+        if (!destinationTargetNode) { renderTacticalLineup(teamId); return; }
+
+        const originCoord = sourceStageNode.getBoundingClientRect();
+        const targetCoord = destinationTargetNode.getBoundingClientRect();
+
+        const flyClone = document.createElement('img');
+        flyClone.src = imgUrl;
+        flyClone.className = 'player-fly-particle';
+        
+        flyClone.style.top = `${originCoord.top}px`;
+        flyClone.style.left = `${originCoord.left}px`;
+        flyClone.style.width = `${originCoord.width}px`;
+        flyClone.style.height = `${originCoord.height}px`;
+        document.body.appendChild(flyClone);
+
+        flyClone.offsetWidth;
+
+        flyClone.style.top = `${targetCoord.top}px`;
+        flyClone.style.left = `${targetCoord.left}px`;
+        flyClone.style.width = `${targetCoord.width}px`;
+        flyClone.style.height = `${targetCoord.height}px`;
+
+        setTimeout(() => {
+            flyClone.remove();
+            renderTacticalLineup(teamId);
+        }, 850);
+    }
+
+    function renderTacticalLineup(teamId) {
+        let teamData = localTeamsRosterState[teamId];
+        if(!teamData) return;
+
+        const positions = ['GK', 'CB', 'CMF', 'FWD'];
+        positions.forEach(pos => { document.getElementById(`lane-${teamId}-${pos}`).innerHTML = ''; });
+
+        teamData.players.forEach(p => {
+            let rowLane = document.getElementById(`lane-${teamId}-${p.position}`);
+            if(rowLane) {
+                let card = document.createElement('div');
+                card.className = "field-player-card";
+                card.innerHTML = `
+                    <div class="player-photo-node"><img src="${p.img}"></div>
+                    <span class="field-label-tag">${p.position}</span>
+                    <div class="field-p-name text-truncate">${p.name}</div>
+                `;
+                rowLane.appendChild(card);
+            }
+        });
+
+        positions.forEach(pos => {
+            let rowLane = document.getElementById(`lane-${teamId}-${pos}`);
+            if(rowLane.innerHTML === '') {
+                rowLane.innerHTML = `
+                    <div class="field-player-card">
+                        <div class="player-photo-node" style="border-style:dashed; border-color:rgba(255,255,255,0.4); box-shadow:none; background:transparent;"><span class="text-white opacity-50 fs-4">+</span></div>
+                        <span class="field-vacant-text d-block mt-1">[VACANT ${pos}]</span>
+                    </div>
+                `;
+            }
+        });
+
+        document.getElementById(`mgr-img-${teamId}`).src = teamData.manager_img;
+        document.getElementById(`mgr-name-${teamId}`).innerText = teamData.manager;
+        document.getElementById(`cap-img-${teamId}`).src = teamData.captain_img;
+        document.getElementById(`cap-name-${teamId}`).innerText = teamData.captain;
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+        let firstId = Object.keys(localTeamsRosterState)[0];
+        if(firstId) renderTacticalLineup(firstId);
+    });
+</script>
+</body>
+</html>

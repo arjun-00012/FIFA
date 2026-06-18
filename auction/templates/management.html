@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Panel | SOFTTAC Premier League</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;700&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <style>
+        body { background-color: #050508; color: #ffffff; font-family: 'Rajdhani', sans-serif; font-weight: 700; }
+        h1, h3, h5, .nav-brand { font-family: 'Orbitron', sans-serif; letter-spacing: 1px; text-shadow: 0 0 10px rgba(0, 240, 255, 0.4); }
+        .card-custom { background: #101018; border: 2px solid #33334c; border-radius: 14px; box-shadow: 0 10px 30px rgba(0,0,0,0.7); }
+        
+        /* High-Visibility Form Fields for Dark Environments */
+        .form-control, .form-select { background: #161622; border: 2px solid #00f0ff; color: #ffffff; font-size: 1.1rem; font-weight: 700; }
+        .form-control:focus, .form-select:focus { background: #202030; border-color: #39ff14; color: #ffffff; box-shadow: 0 0 15px rgba(57, 255, 20, 0.5); }
+        
+        /* Table Layout Visibility Adjustments */
+        .table-dark { background-color: #101018; --bs-table-bg: #101018; border-color: #33334c; font-size: 1.1rem; }
+        .table-dark th { font-family: 'Orbitron', sans-serif; color: #00f0ff !important; font-weight: 900; font-size: 0.95rem; letter-spacing: 1px; background: #000; border-bottom: 3px solid #00f0ff !important; }
+        .table-dark td { color: #ffffff !important; font-weight: 700; }
+        
+        .modal-content { background-color: #101018; color: #fff; border: 3px solid #00f0ff; box-shadow: 0 0 35px rgba(0, 240, 255, 0.4); }
+        .modal-header { border-bottom: 2px solid #33334c; }
+        .modal-footer { border-top: 2px solid #33334c; }
+        
+        /* High Visibility Text Highlights */
+        .text-neon-cyan { color: #00f0ff !important; text-shadow: 0 0 5px rgba(0,240,255,0.3); }
+        .text-laser-green { color: #39ff14 !important; text-shadow: 0 0 5px rgba(57,255,20,0.3); }
+        .text-neon-gold { color: #ffcc00 !important; text-shadow: 0 0 5px rgba(255,204,0,0.3); }
+        .text-white-bold { color: #ffffff !important; font-weight: 800; }
+    </style>
+</head>
+<body>
+<div class="container py-5">
+    
+    <div class="d-flex justify-content-between align-items-center mb-5 border-bottom border-secondary pb-3">
+        <div>
+            <h1 class="m-0 text-white">SOFTTAC <span class="text-neon-cyan">CONFIG DATA</span></h1>
+            <p class="text-warning m-0 fw-bold fs-5">Live Front-End Registration Engine & Database Control Overlays</p>
+        </div>
+        <a href="{% url 'auction_dashboard' %}" class="btn btn-info px-4 py-2 font-monospace fw-black fs-5 text-dark" style="background-color:#00f0ff; border:none;">🖥️ PROJECTOR SCREEN VIEW</a>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <div class="col-md-6">
+            <div class="card card-custom p-4 h-100">
+                <h3 class="mb-4 fs-4 text-uppercase border-bottom border-dark pb-2 text-neon-cyan">🛡️ Register New Team</h3>
+                <form method="POST" action="{% url 'management_panel' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="add_team">
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold">Team Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., Brazil, Argentina..." required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold">Upload Team Logo Poster File</label>
+                        <input type="file" name="logo" class="form-control" accept="image/*" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold">Initial Bank Wallet ($)</label>
+                        <input type="number" name="budget" class="form-control" value="1000" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-white small fw-bold">Manager Name</label>
+                            <input type="text" name="manager_name" class="form-control" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-white small fw-bold">Upload Manager Profile Photo</label>
+                            <input type="file" name="manager_image" class="form-control" accept="image/*" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-white small fw-bold">Captain Name</label>
+                            <input type="text" name="captain_name" class="form-control" required>
+                        </div>
+                        <div class="col-12 mb-3">
+                            <label class="form-label text-white small fw-bold">Upload Captain Profile Photo</label>
+                            <input type="file" name="captain_image" class="form-control" accept="image/*" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 py-3 fw-bold mt-2 text-uppercase fs-5" style="background-color:#0d6efd; border:none;">SAVE SQUAD REGISTRY</button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card card-custom p-4 h-100">
+                <h3 class="mb-4 fs-4 text-uppercase border-bottom border-dark pb-2 text-laser-green">🏃 Register Draft Player</h3>
+                <form method="POST" action="{% url 'management_panel' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <input type="hidden" name="form_type" value="add_player">
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold">Player Full Name</label>
+                        <input type="text" name="name" class="form-control" placeholder="e.g., Lionel Messi" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label text-white small fw-bold">Upload Player Profile Photo File</label>
+                        <input type="file" name="image" class="form-control" accept="image/*" required>
+                    </div>
+                    <div class="row">
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-white small fw-bold">Tactical Slot Role</label>
+                            <select name="position" class="form-select" required>
+                                <option value="GK">Goalkeeper (GK)</option>
+                                <option value="CB">Center Back (CB)</option>
+                                <option value="CMF">Central Midfielder (CMF)</option>
+                                <option value="FWD">Forward (FWD)</option>
+                            </select>
+                        </div>
+                        <div class="col-6 mb-3">
+                            <label class="form-label text-white small fw-bold">Base Cost Valuation ($)</label>
+                            <input type="number" name="base_amount" class="form-control" value="20" required>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-info w-100 py-3 fw-bold mt-4 text-dark text-uppercase fs-5" style="background-color:#39ff14; border:none;">REGISTER TARGET PLAYER</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="card card-custom p-4 mb-5">
+        <h3 class="mb-4 fs-4 text-uppercase border-bottom border-dark pb-2 text-laser-green">Teams Database Array</h3>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover border border-secondary m-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Poster</th>
+                        <th>Team Brand</th>
+                        <th>Manager Info</th>
+                        <th>Captain Info</th>
+                        <th>Wallet</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for team in teams %}
+                    <tr>
+                        <td><img src="{{ team.logo.url }}" class="rounded" style="width:45px; height:45px; object-fit:contain; background:#000; border:1px solid #333;"></td>
+                        <td class="fw-black fs-4 text-neon-cyan">{{ team.name }}</td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ team.manager_image.url }}" class="rounded-circle" style="width:30px; height:30px; object-fit:cover;">
+                                <span class="text-white-bold fs-5">{{ team.manager_name }}</span>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="d-flex align-items-center gap-2">
+                                <img src="{{ team.captain_image.url }}" class="rounded-circle" style="width:30px; height:30px; object-fit:cover;">
+                                <span class="text-neon-gold fw-bold fs-5">{{ team.captain_name }}</span>
+                            </div>
+                        </td>
+                        <td class="text-laser-green fw-black fs-4">${{ team.budget }}</td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-warning me-2 fw-bold text-dark" onclick="openTeamEditModal({{ team.id }}, '{{ team.name|escapejs }}', {{ team.budget }}, '{{ team.manager_name|escapejs }}', '{{ team.captain_name|escapejs }}')">Edit</button>
+                            <button class="btn btn-sm btn-danger fw-bold text-white" onclick="confirmDeleteTeam({{ team.id }}, '{{ team.name|escapejs }}')">Delete</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="6" class="text-center text-warning py-4 font-monospace fs-5">No teams configured in backend engine matrix.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card card-custom p-4">
+        <h3 class="mb-4 fs-4 text-uppercase border-bottom border-dark pb-2 text-laser-green">Roster Draft Pool Log</h3>
+        <div class="table-responsive">
+            <table class="table table-dark table-hover border border-secondary m-0 align-middle">
+                <thead>
+                    <tr>
+                        <th>Face Photo</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Base Value</th>
+                        <th>Draft Assignment</th>
+                        <th>Status</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in players %}
+                    <tr>
+                        <td><img src="{{ player.image.url }}" class="rounded-circle" style="width:45px; height:45px; object-fit:cover; border: 2px solid #00f0ff;"></td>
+                        <td class="text-white-bold fs-5">{{ player.name }}</td>
+                        <td><span class="badge bg-danger fs-6 font-monospace px-3 py-1">{{ player.position }}</span></td>
+                        <td class="text-neon-gold fw-black fs-5">${{ player.base_amount }}</td>
+                        <td class="text-neon-cyan font-monospace fw-black fs-5">{{ player.team.name|default:"Unassigned" }}</td>
+                        <td>
+                            <span class="badge {% if player.status == 'SOLD' %}bg-success text-white{% else %}bg-dark text-warning border border-warning{% endif %} px-3 py-1 font-monospace fs-6">
+                                {{ player.status }}
+                            </span>
+                        </td>
+                        <td class="text-end">
+                            <button class="btn btn-sm btn-warning me-2 fw-bold text-dark" onclick="openPlayerEditModal({{ player.id }}, '{{ player.name|escapejs }}', '{{ player.position }}', {{ player.base_amount }}, '{{ player.status }}')">Edit</button>
+                            <button class="btn btn-sm btn-danger fw-bold text-white" onclick="confirmDeletePlayer({{ player.id }}, '{{ player.name|escapejs }}')">Delete</button>
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr><td colspan="7" class="text-center text-warning py-4 font-monospace fs-5">No players configured in backend engine matrix.</td></tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal fade" id="editTeamModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{% url 'management_panel' %}" enctype="multipart/form-data" class="modal-content">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="edit_team">
+            <input type="hidden" name="team_id" id="edit_team_id">
+            <div class="modal-header">
+                <h5 class="modal-title text-neon-gold">⚙️ UPDATE TEAM MASTER PROFILE</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Team Name</label>
+                    <input type="text" name="name" id="edit_team_name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Change Logo Poster File (Leave blank to keep current)</label>
+                    <input type="file" name="logo" class="form-control" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Wallet Allocation Amount</label>
+                    <input type="number" name="budget" id="edit_team_budget" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Manager Name</label>
+                    <input type="text" name="manager_name" id="edit_team_manager" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Change Manager Photo (Leave blank to keep current)</label>
+                    <input type="file" name="manager_image" class="form-control" accept="image/*">
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Captain Name</label>
+                    <input type="text" name="captain_name" id="edit_team_captain" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Change Captain Photo (Leave blank to keep current)</label>
+                    <input type="file" name="captain_image" class="form-control" accept="image/*">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary font-monospace" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning text-dark fw-bold px-4">SAVE DATA CHANGES</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="modal fade" id="editPlayerModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <form method="POST" action="{% url 'management_panel' %}" enctype="multipart/form-data" class="modal-content">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="edit_player">
+            <input type="hidden" name="player_id" id="edit_player_id">
+            <div class="modal-header">
+                <h5 class="modal-title text-neon-gold">⚙️ UPDATE PLAYER REGISTER DETAILS</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Player Full Name</label>
+                    <input type="text" name="name" id="edit_player_name" class="form-control" required>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-white fw-bold">Change Profile Photo File (Leave blank to keep current)</label>
+                    <input type="file" name="image" class="form-control" accept="image/*">
+                </div>
+                <div class="row">
+                    <div class="col-6 mb-3">
+                        <label class="form-label text-white fw-bold">Tactical Formation Position</label>
+                        <select name="position" id="edit_player_pos" class="form-select" required>
+                            <option value="GK">Goalkeeper (GK)</option>
+                            <option value="CB">Center Back (CB)</option>
+                            <option value="CMF">Central Midfielder (CMF)</option>
+                            <option value="FWD">Forward (FWD)</option>
+                        </select>
+                    </div>
+                    <div class="col-6 mb-3">
+                        <label class="form-label text-white fw-bold">Base Valuation Price ($)</label>
+                        <input type="number" name="base_amount" id="edit_player_base" class="form-control" required>
+                    </div>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label text-warning fw-bold">Auction Status Block</label>
+                    <select name="status" id="edit_player_status" class="form-select border-warning text-neon-gold" required>
+                        <option value="UNSOLD">UNSOLD (Available in Pool)</option>
+                        <option value="BIDDING">BIDDING (Active on Stage)</option>
+                        <option value="SOLD">SOLD (Locked to Team Lineup)</option>
+                    </select>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary font-monospace" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-warning text-dark fw-bold px-4">SAVE DATA CHANGES</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<form id="globalDeleteForm" method="POST" action="{% url 'management_panel' %}" style="display:none;">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" id="delete_form_type">
+    <input type="hidden" name="team_id" id="delete_target_team_id">
+    <input type="hidden" name="player_id" id="delete_target_player_id">
+</form>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    function openTeamEditModal(id, name, budget, manager, captain) {
+        document.getElementById('edit_team_id').value = id;
+        document.getElementById('edit_team_name').value = name;
+        document.getElementById('edit_team_budget').value = budget;
+        document.getElementById('edit_team_manager').value = manager;
+        document.getElementById('edit_team_captain').value = captain;
+        
+        new bootstrap.Modal(document.getElementById('editTeamModal')).show();
+    }
+    
+    function confirmDeleteTeam(id, name) {
+        if(confirm(`Are you completely sure you want to delete "${name}"?`)) {
+            document.getElementById('delete_form_type').value = 'delete_team';
+            document.getElementById('delete_target_team_id').value = id;
+            document.getElementById('globalDeleteForm').submit();
+        }
+    }
+    
+    function openPlayerEditModal(id, name, pos, base, status) {
+        document.getElementById('edit_player_id').value = id;
+        document.getElementById('edit_player_name').value = name;
+        document.getElementById('edit_player_pos').value = pos;
+        document.getElementById('edit_player_base').value = base;
+        document.getElementById('edit_player_status').value = status;
+        
+        new bootstrap.Modal(document.getElementById('editPlayerModal')).show();
+    }
+    
+    function confirmDeletePlayer(id, name) {
+        if(confirm(`Are you sure you want to delete player "${name}"?`)) {
+            document.getElementById('delete_form_type').value = 'delete_player';
+            document.getElementById('delete_target_player_id').value = id;
+            document.getElementById('globalDeleteForm').submit();
+        }
+    }
+</script>
+</body>
+</html>

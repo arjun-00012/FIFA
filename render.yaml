@@ -1,0 +1,25 @@
+services:
+  - type: web
+    name: softtac-auction-arena
+    runtime: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn core.wsgi:application" # Replace 'core' with your actual directory folder name containing wsgi.py
+    envVars:
+      - key: DJANGO_SETTINGS_MODULE
+        value: core.settings # Replace 'core' with your app name
+      - key: DJANGO_DEBUG
+        value: "False"
+      - key: DJANGO_SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: softtac-postgres-db
+          property: connectionString
+    disk:
+      name: softtac-media-storage
+      mountPath: /opt/render/project/src/media # Maps uploaded files to persistent hardware disks
+      sizeGB: 1
+
+databases:
+  - name: softtac-postgres-db
+    plan: free
