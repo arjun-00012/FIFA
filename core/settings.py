@@ -39,6 +39,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'whitenoise.runserver_nostatic',
+    'cloudinary_storage',
+    'cloudinary',
     'auction',
 ]
 
@@ -122,14 +124,23 @@ STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
 STORAGES = {
     "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
+        "BACKEND": "cloudinary_storage.storage.MediaCloudinaryStorage",
     },
     "staticfiles": {
         "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
     },
 }
 
-# MEDIA UPLOADS
+# CLOUDINARY MASTER STORAGE ROUTER
+# These will securely read the values we just pasted into your Render Environment Variables!
+CLOUDINARY_STORAGE = {
+    'CLOUD_NAME': os.environ.get('dwk9pw2ol'),
+    'API_KEY': os.environ.get('715241379841871'),
+    'API_SECRET': os.environ.get('wPtabcIXDXDJnrfeWpZtBC2RK_U'),
+}
+
+STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+
 MEDIA_URL = '/media/'
-# If deploying with a Render Disk Volume, map this to your mount path
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
